@@ -24,7 +24,7 @@ end
 
 task :production do
   set :env, 'production'
-  server 'production-graphiti01.pp.prod', :web, :app, :db, :primary => true,
+  server 'production-graphiti01.pp.prod', :web, :app, :db, :primary => true
 end
 
 namespace :graphiti do
