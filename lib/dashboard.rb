@@ -5,9 +5,11 @@ class Dashboard
 
   def self.save(slug = nil, json)
     slug ||= json[:slug]
+    slug = "#{Time.now.to_f}".delete('.') if slug.nil? || slug.empty?
+    json[:slug] = slug
     key = "dashboards:#{slug}"
     redis.hset key, "title", json[:title]
-    redis.hset key, "slug", json[:slug]
+    redis.hset key, "slug", slug
     redis.hset key, "updated_at", Time.now.to_i
     redis.zadd "dashboards", Time.now.to_f * 1000, slug
     redis.sadd "graphs:dashboards", slug
@@ -90,6 +92,7 @@ class Dashboard
     dashboard = find(slug, true)
     if dashboard
       graphs = snapshot_graphs(slug)
+      return false if graphs.empty?
       timestamp = Time.now.strftime "%a %b %d %I:%M%p"
       haml = Haml::Engine.new(File.read(File.join(File.dirname(__FILE__), '..', 'views', 'report.haml')))
       html = haml.render(Object.new, :dashboard => dashboard, :time => timestamp, :graphs => graphs)
