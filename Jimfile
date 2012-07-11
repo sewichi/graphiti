@@ -3,7 +3,7 @@
   "vendor_dir": "public/js/libs",
   "bundles": {
     "default" : [
-      ["jquery", "1.6.4"],
+      ["jquery", "1.7.2"],
       "keymaster",
       ["sammy", "0.7.0"],
       ["sammy.nested_params", "0.7.0"],

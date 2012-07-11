@@ -27,9 +27,21 @@
             + New Graph
   #container
     #view-controls
-      %label{for: 'auto-refresh'}
-        %input#auto-refresh{:name => 'auto-refresh', :type => 'checkbox', :checked => Graphiti.settings.auto_refresh['enabled'], 'data-interval' => Graphiti.settings.auto_refresh['interval']}
-          Refresh every #{Graphiti.settings.auto_refresh['interval']} seconds
+      %ul
+        %li.graph-intervals
+          %label Interval:
+          %select{name: 'interval'}
+            %option{value: '-3h'} 3 Hours
+            %option{value: '-12h'} 12 Hours
+            %option{value: '-2d'} 2 Days
+            %option{value: '-7d'} 1 week
+            %option{value: '-30d'} 1 month
+
+      %ul
+        %li.refresh
+          %label{for: 'auto-refresh'}
+            %input#auto-refresh{:name => 'auto-refresh', :type => 'checkbox', :checked => Graphiti.settings.auto_refresh['enabled'], 'data-interval' => Graphiti.settings.auto_refresh['interval']}
+              Refresh every #{Graphiti.settings.auto_refresh['interval']} seconds
     #loading-pane.pane
       %h2 ... Loading ...
     #dashboards-pane.pane{style: 'display:none;'}
@@ -85,7 +97,7 @@
               .options-group
                 %p
                   %label.check{for: 'check_variableInterval'} Variable Interval
-                  %input.variable-interval-toggle{type: 'checkbox', id: 'check_variableInterval', name: 'options[variableInterval]'}
+                  %input.variable-interval-toggle{type: 'checkbox', id: 'check_variableInterval', name: 'options[variableInterval]', value: 'true'}
                 .variable-interval-fixed
                   %p
                     %label From
@@ -111,9 +123,9 @@
                       %option= i
                 %p
                   %label.check{for: 'check_fontBold'} Bold
-                  %input{type: 'checkbox', id: 'check_fontBold', name: 'options[fontBold]'}
+                  %input{type: 'checkbox', id: 'check_fontBold', name: 'options[fontBold]', value: 'true'}
                   %label.check{for: 'check_fontItalic'} Italic
-                  %input{type: 'checkbox', id: 'check_fontItalic', name: 'options[fontItalic]'}
+                  %input{type: 'checkbox', id: 'check_fontItalic', name: 'options[fontItalic]', value: 'true'}
               .options-group
                 %p
                   %label Line Mode
@@ -154,10 +166,10 @@
                     %option all
                 %p
                   %label{for: 'check_hideGrid'} Hide Grid
-                  %input{type: 'checkbox', id: 'check_hideGrid', name: 'options[hideGrid]'}
+                  %input{type: 'checkbox', id: 'check_hideGrid', name: 'options[hideGrid]', value: 'true'}
                 %p
                   %label{for: 'check_hideAxes'} Hide Axes
-                  %input{type: 'checkbox', id: 'check_hideAxes', name: 'options[hideAxes]'}
+                  %input{type: 'checkbox', id: 'check_hideAxes', name: 'options[hideAxes]', value: 'true'}
                 %p
                   %label Hide Legend
                   %select{name: 'options[hideLegend]'}
@@ -166,7 +178,7 @@
                     %option{value: 'false'} always show
                 %p
                   %label{for: 'check_drawNullAsZero'} Draw Null as Zero
-                  %input{type: 'checkbox', id: 'check_drawNullAsZero', name: 'options[drawNullAsZero]'}
+                  %input{type: 'checkbox', id: 'check_drawNullAsZero', name: 'options[drawNullAsZero]', value: 'true'}
               .clear
               .options-group
                 %p

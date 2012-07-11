@@ -112,6 +112,12 @@ var app = Sammy('body', function() {
       this.graphPreview(json);
       this.setEditorJSON(json);
     },
+    setOptions: function(options) {
+      var json = this.getEditorJSON();
+      $.extend(json.options, options);
+      this.graphPreview(json);
+      this.setEditorJSON(json);
+    },
     buildMetricsList: function($list, metrics) {
       var $li = $list.find('li:first').clone();
       $list.html('');
@@ -362,6 +368,9 @@ var app = Sammy('body', function() {
       $('.variable-interval-toggle').change(function() {
         $('.variable-interval-fixed').toggle();
       });
+      $('.graph-intervals select').change(function() {
+        ctx.trigger('change-interval', {interval: $(this).val()});
+      });
     },
 
     toggleEditorPanesByPreference: function() {
@@ -548,6 +557,10 @@ var app = Sammy('body', function() {
     } else {
       $new.show(); $add.hide();
     }
+  });
+
+  this.bind('change-interval', function(e, data) {
+    this.setOptions({from: data.interval});
   });
 
   this.registerShortcut('redraw-preview', 'g', function() {
