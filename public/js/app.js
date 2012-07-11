@@ -25,6 +25,8 @@ var app = Sammy('body', function() {
     });
   };
 
+  var isUnsaved = false;
+
   this.helpers({
     showPane: function(pane, content) {
       var selector = '#' + pane + '-pane';
@@ -72,10 +74,18 @@ var app = Sammy('body', function() {
         }).show();
         $('[name=uuid]').val(uuid);
         $('#graph-actions').find('.update, .dashboard, .snapshots').show();
+        this.toggleUpdateAvailability();
       } else {
         $('#graph-actions').find('.update, .dashboard, .snapshots').hide();
       }
       this.toggleEditorPanesByPreference();
+    },
+    toggleUpdateAvailability: function() {
+      if (isUnsaved) {
+        $('#graph-actions').find('.update input').removeAttr('disabled');
+      } else {
+        $('#graph-actions').find('.update input').attr('disabled', 'disabled');
+      }
     },
     getEditorJSON: function() {
       return JSON.parse(this.app.editor.getSession().getValue());
