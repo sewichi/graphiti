@@ -13060,8 +13060,6 @@ var app = Sammy('body', function() {
     });
   };
 
-  var isUnsaved = false;
-
   this.helpers({
     showPane: function(pane, content) {
       var selector = '#' + pane + '-pane';
@@ -13109,14 +13107,14 @@ var app = Sammy('body', function() {
         }).show();
         $('[name=uuid]').val(uuid);
         $('#graph-actions').find('.update, .dashboard, .snapshots').show();
-        this.toggleUpdateAvailability();
+        this.toggleUpdateAvailability(false);
       } else {
         $('#graph-actions').find('.update, .dashboard, .snapshots').hide();
       }
       this.toggleEditorPanesByPreference();
     },
-    toggleUpdateAvailability: function() {
-      if (isUnsaved) {
+    toggleUpdateAvailability: function(unsaved) {
+      if (unsaved) {
         $('#graph-actions').find('.update input').removeAttr('disabled');
       } else {
         $('#graph-actions').find('.update input').attr('disabled', 'disabled');
@@ -13154,6 +13152,7 @@ var app = Sammy('body', function() {
     saveOptions: function(params) {
       var json = this.getEditorJSON();
       json.options = params;
+      this.toggleUpdateAvailability(true);
       this.graphPreview(json);
       this.setEditorJSON(json);
     },
@@ -13573,6 +13572,7 @@ var app = Sammy('body', function() {
     graph.save(this.params.uuid, function(response) {
       Sammy.log('updated', response);
       ctx.hideSaving();
+      ctx.toggleUpdateAvailability(false);
       ctx.redrawPreview();
     });
   });
@@ -13609,6 +13609,7 @@ var app = Sammy('body', function() {
   });
 
   this.registerShortcut('redraw-preview', 'g', function() {
+    this.toggleUpdateAvailability(true);
     this.redrawPreview();
   });
 
@@ -13630,6 +13631,7 @@ var app = Sammy('body', function() {
       .live('click', disableSave)
       .live('focus', disableSave)
       .live('blur', disableSave);
+
     $('.dashboard button[rel=create], .dashboard a[rel="cancel"]').live('click', function(e) {
       e.preventDefault();
       ctx.trigger('toggle-dashboard-creation', {target: $(this).parents('.dashboard')});
@@ -13637,6 +13639,7 @@ var app = Sammy('body', function() {
 
     $('#graph-actions').delegate('.redraw', 'click', function(e) {
       e.preventDefault();
+      ctx.toggleUpdateAvailability(true);
       ctx.redrawPreview();
     });
   });
