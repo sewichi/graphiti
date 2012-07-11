@@ -357,6 +357,13 @@ var app = Sammy('body', function() {
       });
     },
 
+    bindIntervalToggling: function() {
+      var ctx = this;
+      $('.variable-interval-toggle').change(function() {
+        $('.variable-interval-fixed').toggle();
+      });
+    },
+
     toggleEditorPanesByPreference: function() {
       var ctx = this;
       $('#editor-pane .edit-group').each(function() {
@@ -551,6 +558,7 @@ var app = Sammy('body', function() {
     var ctx = this;
 
     this.bindEditorPanes();
+    this.bindIntervalToggling();
     this.bindMetricsList();
 
     var disableSave = function() {

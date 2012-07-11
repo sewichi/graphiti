@@ -84,11 +84,15 @@
             %form{action: '/graphs/options', method: 'put'}
               .options-group
                 %p
-                  %label From
-                  %input{type: 'text', name: 'options[from]'}
-                %p
-                  %label Until
-                  %input{type: 'text', name: 'options[until]'}
+                  %label.check{for: 'check_variableInterval'} Variable Interval
+                  %input.variable-interval-toggle{type: 'checkbox', id: 'check_variableInterval', name: 'options[variableInterval]'}
+                .variable-interval-fixed
+                  %p
+                    %label From
+                    %input{type: 'text', name: 'options[from]'}
+                  %p
+                    %label Until
+                    %input{type: 'text', name: 'options[until]'}
                 %p
                   %label Title
                   %input{type: 'text', name: 'options[title]'}

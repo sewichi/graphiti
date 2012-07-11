@@ -232,7 +232,9 @@ body.bp {
       @include column(($blueprint-grid-columns / 3) - 1, true);
     }
     p {
-      padding: 5px 0px 0px 15px;
+      padding: 5px 0px 0px 25px;
+      margin: 0px;
+      clear:both;
       label {
         font-weight: bold;
         width: 100px;
