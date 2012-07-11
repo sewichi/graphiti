@@ -13106,10 +13106,10 @@ var app = Sammy('body', function() {
           }
         }).show();
         $('[name=uuid]').val(uuid);
-        $('#graph-actions').find('.update, .dashboard, .snapshots').show();
+        $('#graph-actions').find('.update, .dashboard').show();
         this.toggleUpdateAvailability(false);
       } else {
-        $('#graph-actions').find('.update, .dashboard, .snapshots').hide();
+        $('#graph-actions').find('.update, .dashboard').hide();
       }
       this.toggleEditorPanesByPreference();
     },
@@ -13263,18 +13263,24 @@ var app = Sammy('body', function() {
           });
     },
     buildSnapshotsDropdown: function(urls, clear) {
-      var $select = $('select[name="snapshot"]');
+      var $snapshot_controls = $('li.snapshots form.select');
+      var $select = $snapshot_controls.find('select');
       if (clear) { $select.html(''); }
       var i = 0,
           l = urls.length, url, date;
+      if (l < 1) {
+        $snapshot_controls.hide();
+        return;
+      }
       for (; i < l; i++) {
         url = urls[i];
         date = this.snapshotURLToDate(url);
         $('<option />', {
           value: url,
           text: date
-        }).prependTo($select).attr('selected', 'selected');
+        }).prependTo($select).attr('selected', 'selected')
       }
+      $snapshot_controls.show();
     },
     loadAndRenderGraphs: function(url) {
       var $graphs = this.showPane('graphs', ' ');
@@ -13468,8 +13474,8 @@ var app = Sammy('body', function() {
   this.get('/graphs/:uuid', function(ctx) {
     this.load('/graphs/' + this.params.uuid + '.js', {cache: false})
         .then(function(graph_data) {
-          ctx.buildSnapshotsDropdown(graph_data.snapshots, true);
           ctx.showEditor(graph_data.json, ctx.params.uuid);
+          ctx.buildSnapshotsDropdown(graph_data.snapshots, true);
         });
   });
 

@@ -82,10 +82,11 @@
             %h4 Snapshots
             %form.save-new{"data-action" => '/graphs/:uuid/snapshots', method: 'post'}
               %input.save.create{type: 'submit', value: 'Save New'}
-            %form.select{"data-action" => '/graphs/:uuid/snapshots', method: 'get'}
+            %form.select{"data-action" => '/graphs/:uuid/snapshots', method: 'get', style: 'display:none'}
               %select{name: 'snapshot'}
               %input.save.create{type: 'submit', value: 'View'}
-            %form.select{"data-action" => '/graphs/:uuid/snapshots', method: 'get'}
+            %form.select{"data-action" => '/graphs/:uuid/snapshots', method: 'get', style: 'display:none'}
+
               %input.save{type: 'submit', value: 'View All'}
         .clear
       .edit-group{'data-group' => 'options'}

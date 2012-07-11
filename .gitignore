@@ -6,5 +6,6 @@ config/amazon_s3.yml
 .bundle/config
 public/images/snapshots
 public/snapshots
+public/storage
 vendor/bundle
 tmp
