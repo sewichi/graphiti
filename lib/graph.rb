@@ -12,6 +12,7 @@ class Graph
     redis.hset "graphs:#{uuid}", "json", graph_json[:json]
     redis.hset "graphs:#{uuid}", "updated_at", Time.now.to_i
     redis.hset "graphs:#{uuid}", "url", graph_json[:url]
+    redis.hset "graphs:#{uuid}", "variableInterval", graph_json[:variableInterval] ? 1 : 0
     redis.zadd "graphs", Time.now.to_i, uuid
     uuid
   end

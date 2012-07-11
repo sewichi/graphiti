@@ -136,6 +136,7 @@ Graphiti.Graph.prototype = {
     var data = {
       graph: {
         title: this.options.title || 'Untitled',
+        variableInterval: this.options.variableInterval || false,
         url: this.buildURL(),
         json: this.toJSON()
       }
