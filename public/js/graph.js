@@ -47,6 +47,7 @@ Graphiti.Graph = function(targetsAndOptions){
   } else {
     $.extend(true, this.options, defaults);
   }
+  console.log(this.options.from);
 
   if (targetsAndOptions.targets){
     var i = 0, l = targetsAndOptions.targets.length;

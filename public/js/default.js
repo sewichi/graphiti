@@ -12907,6 +12907,7 @@ Graphiti.Graph = function(targetsAndOptions){
   } else {
     $.extend(true, this.options, defaults);
   }
+  console.log(this.options.from);
 
   if (targetsAndOptions.targets){
     var i = 0, l = targetsAndOptions.targets.length;
@@ -13042,6 +13043,14 @@ var app = Sammy('body', function() {
   this.use('NestedParams');
 
   var canon = require("pilot/canon");
+
+  var intervals = [
+    ['-3h', '3 Hours'],
+    ['-12h', '12 Hours'],
+    ['-2d', '2 Days'],
+    ['-7d', '1 Week'],
+    ['-30d', '1 month']
+  ];
 
   this.registerShortcut = function(name, keys, callback) {
     var app = this;
@@ -13343,6 +13352,18 @@ var app = Sammy('body', function() {
         });
       }
     },
+    buildIntervalsGraphs: function(graph) {
+      var i = 0, l = intervals.length, graphs = [], json;
+      graph.json = JSON.parse(graph.json);
+      for (; i < l; i++) {
+        var new_graph = $.extend(true, {}, graph);
+        console.log(intervals[i][0]);
+        new_graph.json.options['from'] = intervals[i][0];
+        new_graph.json.options['title'] = graph.json.options.title + ", " + intervals[i][1];
+        graphs.push(new_graph);
+      }
+      this.renderGraphs({graphs: graphs});
+    },
     loadAndRenderDashboards: function() {
       var $dashboards = this.showPane('dashboards', '<h2>Dashboards</h2>');
       var ctx = this;
@@ -13483,6 +13504,13 @@ var app = Sammy('body', function() {
         .then(function(graph_data) {
           ctx.showEditor(graph_data.json, ctx.params.uuid);
           ctx.buildSnapshotsDropdown(graph_data.snapshots, true);
+        });
+  });
+
+  this.get('/graphs/:uuid/intervals', function(ctx) {
+    this.load('/graphs/' + this.params.uuid + '.js', {cache: false})
+        .then(function(graph_data) {
+          ctx.buildIntervalsGraphs(graph_data);
         });
   });
 
