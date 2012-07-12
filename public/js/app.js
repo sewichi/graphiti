@@ -4,6 +4,14 @@ var app = Sammy('body', function() {
 
   var canon = require("pilot/canon");
 
+  var intervals = [
+    ['-3h', '3 Hours'],
+    ['-12h', '12 Hours'],
+    ['-2d', '2 Days'],
+    ['-7d', '1 Week'],
+    ['-30d', '1 month']
+  ];
+
   this.registerShortcut = function(name, keys, callback) {
     var app = this;
     app.bind(name, callback);
@@ -65,17 +73,25 @@ var app = Sammy('body', function() {
       this.graphPreview(JSON.parse(text));
       this.buildDashboardsDropdown(uuid);
       if (uuid) { // this is an already saved graph
-        $('#graph-actions form').attr('data-action', function(i, action) {
+        $('#graph-actions form, #view-controls form').attr('data-action', function(i, action) {
           if (action) {
             $(this).attr('action', action.replace(/:uuid/, uuid));
           }
         }).show();
         $('[name=uuid]').val(uuid);
-        $('#graph-actions').find('.update, .dashboard, .snapshots').show();
+        $('#graph-actions').find('.update, .dashboard').show();
+        this.toggleUpdateAvailability(false);
       } else {
-        $('#graph-actions').find('.update, .dashboard, .snapshots').hide();
+        $('#graph-actions').find('.update, .dashboard').hide();
       }
       this.toggleEditorPanesByPreference();
+    },
+    toggleUpdateAvailability: function(unsaved) {
+      if (unsaved) {
+        $('#graph-actions').find('.update input').removeAttr('disabled');
+      } else {
+        $('#graph-actions').find('.update input').attr('disabled', 'disabled');
+      }
     },
     getEditorJSON: function() {
       return JSON.parse(this.app.editor.getSession().getValue());
@@ -109,6 +125,13 @@ var app = Sammy('body', function() {
     saveOptions: function(params) {
       var json = this.getEditorJSON();
       json.options = params;
+      this.toggleUpdateAvailability(true);
+      this.graphPreview(json);
+      this.setEditorJSON(json);
+    },
+    setOptions: function(options) {
+      var json = this.getEditorJSON();
+      $.extend(json.options, options);
       this.graphPreview(json);
       this.setEditorJSON(json);
     },
@@ -213,73 +236,93 @@ var app = Sammy('body', function() {
           });
     },
     buildSnapshotsDropdown: function(urls, clear) {
-      var $select = $('select[name="snapshot"]');
+      var $snapshot_controls = $('li.snapshots form.select');
+      var $select = $snapshot_controls.find('select');
       if (clear) { $select.html(''); }
       var i = 0,
           l = urls.length, url, date;
+      if (l < 1) {
+        $snapshot_controls.hide();
+        return;
+      }
       for (; i < l; i++) {
         url = urls[i];
         date = this.snapshotURLToDate(url);
         $('<option />', {
           value: url,
           text: date
-        }).prependTo($select).attr('selected', 'selected');
+        }).prependTo($select).attr('selected', 'selected')
       }
+      $snapshot_controls.show();
     },
     loadAndRenderGraphs: function(url) {
-      var $graphs = this.showPane('graphs', ' ');
+      var ctx = this;
       this.load(url, {cache: false})
-          .then(function(data) {
-            var title = 'All Graphs', all_graphs;
-            if (data.title) {
-              all_graphs = false;
-              title = data.title;
-            } else {
-              all_graphs = true;
-            }
-            $graphs.append('<h2>' + title + '</h2>');
-            var graphs = data.graphs,
-                i = 0,
-                l = graphs.length,
-                $graph = $('#templates .graph').clone(),
-                graph, graph_obj;
-            if (data.graphs.length == 0) {
-              $graphs.append($('#graphs-empty'));
-              return true;
-            }
-            for (; i < l; i++) {
-              graph = graphs[i];
-              graph_obj = new Graphiti.Graph(JSON.parse(graph.json));
+          .then('renderGraphs');
+    },
+    renderGraphs: function(data) {
+      var $graphs = this.showPane('graphs', ' ');
+      var title = 'All Graphs', is_dashboard;
+      if (data.title) {
+        is_dashboard = true;
+        title = data.title;
+      } else {
+        is_dashboard = false;
+      }
+      $graphs.append('<h2>' + title + '</h2>');
+      var graphs = data.graphs,
+          i = 0,
+          l = graphs.length,
+          $graph = $('#templates .graph').clone(),
+          graph, graph_obj;
+      if (data.graphs.length == 0) {
+        $graphs.append($('#graphs-empty'));
+        return true;
+      }
+      for (; i < l; i++) {
+        graph = graphs[i];
+        graph_obj = new Graphiti.Graph(graph.json);
 
-              $graph
-              .clone()
-              .find('.title').text(graph.title || 'Untitled').end()
-              .find('a.edit').attr('href', '/graphs/' + graph.uuid).end()
-              .show()
-              .appendTo($graphs).each(function() {
-                // actually replace the graph image
-                graph_obj.image($(this).find('img'));
-                // add a last class alternatingly to fix the display grid
-                if ((i+1)%2 == 0) {
-                  $(this).addClass('last');
-                }
-                // if its all graphs, delete operates on everything
-                if (all_graphs) {
-                  $(this)
-                  .find('.delete')
-                  .attr('action', '/graphs/' + graph.uuid);
-                // otherwise it just removes the graphs
-                } else {
-                  $(this)
-                  .find('.delete')
-                  .attr('action', '/graphs/dashboards')
-                  .find('[name=dashboard]').val(data.slug).end()
-                  .find('[name=uuid]').val(graph.uuid).end()
-                  .find('[type=submit]').val('Remove');
-                }
-              });
-            }
-          });
+        $graph
+        .clone()
+        .find('.title').text(graph.title || 'Untitled').end()
+        .find('a.edit').attr('href', '/graphs/' + graph.uuid).end()
+        .show()
+        .appendTo($graphs).each(function() {
+          // actually replace the graph image
+          graph_obj.image($(this).find('img'));
+          // add a last class alternatingly to fix the display grid
+          if ((i+1)%2 == 0) {
+            $(this).addClass('last');
+          }
+          // if its all graphs, delete operates on everything
+          if (!is_dashboard) {
+            $(this)
+            .find('.delete')
+            .attr('action', '/graphs/' + graph.uuid);
+          // otherwise it just removes the graphs
+          } else {
+            $(this)
+            .find('.delete')
+            .attr('action', '/graphs/dashboards')
+            .find('[name=dashboard]').val(data.slug).end()
+            .find('[name=uuid]').val(graph.uuid).end()
+            .find('[type=submit]').val('Remove');
+          }
+        });
+      }
+    },
+    buildIntervalsGraphs: function(graph) {
+      var i = 0, l = intervals.length, graphs = [], json;
+      graph.json = JSON.parse(graph.json);
+      for (; i < l; i++) {
+        var new_graph = $.extend(true, {}, graph);
+        console.log(intervals[i][0]);
+        new_graph.json.options['from'] = intervals[i][0];
+        new_graph.json.options['title'] = graph.json.options.title + ", " + intervals[i][1];
+        graphs.push(new_graph);
+      }
+      this.renderGraphs({graphs: graphs});
     },
     loadAndRenderDashboards: function() {
       var $dashboards = this.showPane('dashboards', '<h2>Dashboards</h2>');
@@ -357,6 +400,17 @@ var app = Sammy('body', function() {
       });
     },
 
+    bindIntervalToggling: function() {
+      var ctx = this;
+      $('.variable-interval-toggle').change(function() {
+        $(this).parents('form').submit();
+        $('.variable-interval-fixed').toggle();
+      });
+      $('.graph-intervals select').change(function() {
+        ctx.trigger('change-interval', {interval: $(this).val()});
+      });
+    },
+
     toggleEditorPanesByPreference: function() {
       var ctx = this;
       $('#editor-pane .edit-group').each(function() {
@@ -408,8 +462,15 @@ var app = Sammy('body', function() {
   this.get('/graphs/:uuid', function(ctx) {
     this.load('/graphs/' + this.params.uuid + '.js', {cache: false})
         .then(function(graph_data) {
-          ctx.buildSnapshotsDropdown(graph_data.snapshots, true);
           ctx.showEditor(graph_data.json, ctx.params.uuid);
+          ctx.buildSnapshotsDropdown(graph_data.snapshots, true);
+        });
+  });
+
+  this.get('/graphs/:uuid/intervals', function(ctx) {
+    this.load('/graphs/' + this.params.uuid + '.js', {cache: false})
+        .then(function(graph_data) {
+          ctx.buildIntervalsGraphs(graph_data);
         });
   });
 
@@ -512,6 +573,7 @@ var app = Sammy('body', function() {
     graph.save(this.params.uuid, function(response) {
       Sammy.log('updated', response);
       ctx.hideSaving();
+      ctx.toggleUpdateAvailability(false);
       ctx.redrawPreview();
     });
   });
@@ -543,7 +605,12 @@ var app = Sammy('body', function() {
     }
   });
 
+  this.bind('change-interval', function(e, data) {
+    this.setOptions({from: data.interval});
+  });
+
   this.registerShortcut('redraw-preview', 'g', function() {
+    this.toggleUpdateAvailability(true);
     this.redrawPreview();
   });
 
@@ -551,6 +618,7 @@ var app = Sammy('body', function() {
     var ctx = this;
 
     this.bindEditorPanes();
+    this.bindIntervalToggling();
     this.bindMetricsList();
 
     var disableSave = function() {
@@ -564,6 +632,7 @@ var app = Sammy('body', function() {
       .live('click', disableSave)
       .live('focus', disableSave)
       .live('blur', disableSave);
+
     $('.dashboard button[rel=create], .dashboard a[rel="cancel"]').live('click', function(e) {
       e.preventDefault();
       ctx.trigger('toggle-dashboard-creation', {target: $(this).parents('.dashboard')});
@@ -571,6 +640,7 @@ var app = Sammy('body', function() {
 
     $('#graph-actions').delegate('.redraw', 'click', function(e) {
       e.preventDefault();
+      ctx.toggleUpdateAvailability(true);
       ctx.redrawPreview();
     });
   });

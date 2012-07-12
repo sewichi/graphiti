@@ -25,6 +25,10 @@ graph.buildURL();
 Graphiti = window.Graphiti || {};
 
 Graphiti.Graph = function(targetsAndOptions){
+  if (typeof targetsAndOptions == "string") {
+    // We can assume its a JSON object
+    targetsAndOptions = JSON.parse(targetsAndOptions);
+  }
   this.options = {};
   this.targets = [];
   this.parsedTargets = [];
@@ -43,6 +47,7 @@ Graphiti.Graph = function(targetsAndOptions){
   } else {
     $.extend(true, this.options, defaults);
   }
+  console.log(this.options.from);
 
   if (targetsAndOptions.targets){
     var i = 0, l = targetsAndOptions.targets.length;
@@ -136,6 +141,7 @@ Graphiti.Graph.prototype = {
     var data = {
       graph: {
         title: this.options.title || 'Untitled',
+        variableInterval: this.options.variableInterval || false,
         url: this.buildURL(),
         json: this.toJSON()
       }
