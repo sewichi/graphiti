@@ -40,7 +40,6 @@
             %input.save{type: 'submit', value: 'View All'}
 
 
-      %ul
         %li.refresh
           %label{for: 'auto-refresh'}
             %input#auto-refresh{:name => 'auto-refresh', :type => 'checkbox', :checked => Graphiti.settings.auto_refresh['enabled'], 'data-interval' => Graphiti.settings.auto_refresh['interval']}

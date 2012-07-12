@@ -76,6 +76,25 @@ body.bp {
     }
   }
 }
+#view-controls {
+  @include column($blueprint-grid-columns, true);
+  background-color: #f3f3f3;
+  border-bottom: 4px solid #CCC;
+  ul {
+    @include horizontal-list;
+    padding: 10px;
+    width: 1400px; // to prevent wrapping
+    li.graph-intervals {
+      @include column(5);
+      label, select, form {
+        display: inline;
+      }
+    }
+    li.refresh {
+      @include column(4);
+    }
+  }
+}
 #graph-actions {
   @include column($blueprint-grid-columns, true);
   background-color: #f3f3f3;
