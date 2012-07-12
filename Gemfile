@@ -26,6 +26,4 @@ group :development do
   gem 'ruby-debug19'
 end
 
-group :production do
-  gem 'unicorn', '~>1'
-end
+gem 'unicorn', '~>1'
