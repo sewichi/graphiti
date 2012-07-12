@@ -12885,6 +12885,10 @@ graph.buildURL();
 Graphiti = window.Graphiti || {};
 
 Graphiti.Graph = function(targetsAndOptions){
+  if (typeof targetsAndOptions == "string") {
+    // We can assume its a JSON object
+    targetsAndOptions = JSON.parse(targetsAndOptions);
+  }
   this.options = {};
   this.targets = [];
   this.parsedTargets = [];
@@ -13308,7 +13312,7 @@ var app = Sammy('body', function() {
       }
       for (; i < l; i++) {
         graph = graphs[i];
-        graph_obj = new Graphiti.Graph(JSON.parse(graph.json));
+        graph_obj = new Graphiti.Graph(graph.json);
 
         $graph
         .clone()

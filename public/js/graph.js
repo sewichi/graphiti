@@ -25,6 +25,10 @@ graph.buildURL();
 Graphiti = window.Graphiti || {};
 
 Graphiti.Graph = function(targetsAndOptions){
+  if (typeof targetsAndOptions == "string") {
+    // We can assume its a JSON object
+    targetsAndOptions = JSON.parse(targetsAndOptions);
+  }
   this.options = {};
   this.targets = [];
   this.parsedTargets = [];
