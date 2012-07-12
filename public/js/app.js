@@ -65,7 +65,7 @@ var app = Sammy('body', function() {
       this.graphPreview(JSON.parse(text));
       this.buildDashboardsDropdown(uuid);
       if (uuid) { // this is an already saved graph
-        $('#graph-actions form').attr('data-action', function(i, action) {
+        $('#graph-actions form, #view-controls form').attr('data-action', function(i, action) {
           if (action) {
             $(this).attr('action', action.replace(/:uuid/, uuid));
           }
@@ -248,59 +248,61 @@ var app = Sammy('body', function() {
       $snapshot_controls.show();
     },
     loadAndRenderGraphs: function(url) {
-      var $graphs = this.showPane('graphs', ' ');
+      var ctx = this;
       this.load(url, {cache: false})
-          .then(function(data) {
-            var title = 'All Graphs', all_graphs;
-            if (data.title) {
-              all_graphs = false;
-              title = data.title;
-            } else {
-              all_graphs = true;
-            }
-            $graphs.append('<h2>' + title + '</h2>');
-            var graphs = data.graphs,
-                i = 0,
-                l = graphs.length,
-                $graph = $('#templates .graph').clone(),
-                graph, graph_obj;
-            if (data.graphs.length == 0) {
-              $graphs.append($('#graphs-empty'));
-              return true;
-            }
-            for (; i < l; i++) {
-              graph = graphs[i];
-              graph_obj = new Graphiti.Graph(JSON.parse(graph.json));
+          .then('renderGraphs');
+    },
+    renderGraphs: function(data) {
+      var $graphs = this.showPane('graphs', ' ');
+      var title = 'All Graphs', is_dashboard;
+      if (data.title) {
+        is_dashboard = true;
+        title = data.title;
+      } else {
+        is_dashboard = false;
+      }
+      $graphs.append('<h2>' + title + '</h2>');
+      var graphs = data.graphs,
+          i = 0,
+          l = graphs.length,
+          $graph = $('#templates .graph').clone(),
+          graph, graph_obj;
+      if (data.graphs.length == 0) {
+        $graphs.append($('#graphs-empty'));
+        return true;
+      }
+      for (; i < l; i++) {
+        graph = graphs[i];
+        graph_obj = new Graphiti.Graph(JSON.parse(graph.json));
 
-              $graph
-              .clone()
-              .find('.title').text(graph.title || 'Untitled').end()
-              .find('a.edit').attr('href', '/graphs/' + graph.uuid).end()
-              .show()
-              .appendTo($graphs).each(function() {
-                // actually replace the graph image
-                graph_obj.image($(this).find('img'));
-                // add a last class alternatingly to fix the display grid
-                if ((i+1)%2 == 0) {
-                  $(this).addClass('last');
-                }
-                // if its all graphs, delete operates on everything
-                if (all_graphs) {
-                  $(this)
-                  .find('.delete')
-                  .attr('action', '/graphs/' + graph.uuid);
-                // otherwise it just removes the graphs
-                } else {
-                  $(this)
-                  .find('.delete')
-                  .attr('action', '/graphs/dashboards')
-                  .find('[name=dashboard]').val(data.slug).end()
-                  .find('[name=uuid]').val(graph.uuid).end()
-                  .find('[type=submit]').val('Remove');
-                }
-              });
-            }
-          });
+        $graph
+        .clone()
+        .find('.title').text(graph.title || 'Untitled').end()
+        .find('a.edit').attr('href', '/graphs/' + graph.uuid).end()
+        .show()
+        .appendTo($graphs).each(function() {
+          // actually replace the graph image
+          graph_obj.image($(this).find('img'));
+          // add a last class alternatingly to fix the display grid
+          if ((i+1)%2 == 0) {
+            $(this).addClass('last');
+          }
+          // if its all graphs, delete operates on everything
+          if (!is_dashboard) {
+            $(this)
+            .find('.delete')
+            .attr('action', '/graphs/' + graph.uuid);
+          // otherwise it just removes the graphs
+          } else {
+            $(this)
+            .find('.delete')
+            .attr('action', '/graphs/dashboards')
+            .find('[name=dashboard]').val(data.slug).end()
+            .find('[name=uuid]').val(graph.uuid).end()
+            .find('[type=submit]').val('Remove');
+          }
+        });
+      }
     },
     loadAndRenderDashboards: function() {
       var $dashboards = this.showPane('dashboards', '<h2>Dashboards</h2>');
@@ -381,6 +383,7 @@ var app = Sammy('body', function() {
     bindIntervalToggling: function() {
       var ctx = this;
       $('.variable-interval-toggle').change(function() {
+        $(this).parents('form').submit();
         $('.variable-interval-fixed').toggle();
       });
       $('.graph-intervals select').change(function() {

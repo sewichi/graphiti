@@ -36,6 +36,9 @@
             %option{value: '-2d'} 2 Days
             %option{value: '-7d'} 1 week
             %option{value: '-30d'} 1 month
+          %form.select{"data-action" => '/graphs/:uuid/intervals', method: 'get'}
+            %input.save{type: 'submit', value: 'View All'}
+
 
       %ul
         %li.refresh
@@ -86,7 +89,6 @@
               %select{name: 'snapshot'}
               %input.save.create{type: 'submit', value: 'View'}
             %form.select{"data-action" => '/graphs/:uuid/snapshots', method: 'get', style: 'display:none'}
-
               %input.save{type: 'submit', value: 'View All'}
         .clear
       .edit-group{'data-group' => 'options'}

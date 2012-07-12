@@ -127,6 +127,7 @@ class Graphiti < Sinatra::Base
     /graphs/new
     /graphs/:uuid
     /graphs/:uuid/snapshots
+    /graphs/:uuid/intervals
     /graphs
     /dashboards/:slug
     /dashboards
