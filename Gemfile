@@ -23,7 +23,6 @@ end
 group :development do
   gem 'sinatra-reloader', :require => 'sinatra/reloader'
   gem 'thin'
-  gem 'ruby-debug19'
 end
 
-gem 'unicorn', '~>1'
+gem 'unicorn', '~>4'
