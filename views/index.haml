@@ -43,7 +43,13 @@
         %li.refresh
           %label{for: 'auto-refresh'}
             %input#auto-refresh{:name => 'auto-refresh', :type => 'checkbox', :checked => Graphiti.settings.auto_refresh['enabled'], 'data-interval' => Graphiti.settings.auto_refresh['interval']}
-              Refresh every #{Graphiti.settings.auto_refresh['interval']} seconds
+            Refresh every
+            %select{name: 'refresh_interval'}
+              %option{value: '10'} 10
+              %option{value: '30'} 30
+              %option{selected: true, value: '60'} 60
+              %option{value: '120'} 120
+            seconds
     #loading-pane.pane
       %h2 ... Loading ...
     #dashboards-pane.pane{style: 'display:none;'}

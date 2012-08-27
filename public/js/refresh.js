@@ -1,14 +1,15 @@
 Graphiti = window.Graphiti || {};
 
 Graphiti.startRefresh = function(seconds){
+  Sammy.log('Starting refresh every ', seconds, ' seconds');
   this.refreshTimer = setInterval(function(){
-    $('#graphs-pane div.graph img.ggraph').each(function() {
-      var jqt = $(this);
-      var src = jqt.attr('src');
-      //src     = src.substr(0,src.indexOf('_timestamp_'));
-      //src    += '_timestamp_=' + new Date().getTime() + "000#.png";
-      src.replace(/(^.*_timestamp_=).*/, function (match, _1) { return  _1 +  new Date().getTime() + "000#.png"; })
-      jqt.attr('src',src);
+    Sammy.log('Refreshing graph');
+    $('#graphs-pane div.graph img.ggraph, #graph-preview img').attr('src', function(i, src) {
+      Sammy.log($(this));
+      src = src.replace(/(^.*_timestamp_=).*/, function (match, _1) {
+        return  _1 +  new Date().getTime() + 1000 + "#.png";
+      });
+      return src;
     });
   }, seconds * 1000);
 };
@@ -19,13 +20,15 @@ Graphiti.stopRefresh = function(){
 
 Graphiti.setRefresh = function(){
   if ($('#auto-refresh').prop('checked')) {
-    console.log("starting");
-    this.startRefresh($('#auto-refresh').data('interval'));
+    this.startRefresh($("select[name='refresh_interval']").val());
   } else {
-    console.log("stop");
     this.stopRefresh();
   }
 };
 
-$(Graphiti.setRefresh.bind(Graphiti));
-$("#auto-refresh").change(Graphiti.setRefresh.bind(Graphiti));
+$(function() {
+  Graphiti.setRefresh();
+  $(".refresh input, .refresh select").change(function() {
+    Graphiti.setRefresh();
+  });
+});
