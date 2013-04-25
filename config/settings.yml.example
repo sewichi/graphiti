@@ -2,6 +2,9 @@
 graphiti_base_url: http://graphiti.pp.local
 graphite_base_url: http://graphite01.pp.local
 #graphite_base_url: https://user:pass@graphite01.pp.local
+#for use with the rake task for sucking in metrics
+auth_name: "foo"
+auth_pwrd: "bar"
 redis_url: localhost:6379:1/graphiti
 tmp_dir: /tmp
 fonts:

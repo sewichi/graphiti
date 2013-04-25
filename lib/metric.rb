@@ -25,13 +25,28 @@ class Metric
 
   private
   def self.get_metrics_list(prefix = Graphiti.settings.metric_prefix)
-    url = "#{Graphiti.settings.graphite_base_url}/metrics/index.json"
+    url = "#{Graphiti.settings.graphite_base_url}"
+    auth_name = "#{Graphiti.settings.auth_name}"
+    auth_pwrd = "#{Graphiti.settings.auth_pwrd}"
+    if auth_name != "" and auth_pwrd != ""
+      if url.start_with?("http://")
+        parts = url.partition("http://")
+        url = parts[1] + auth_name + ":" + auth_pwrd + "@" + parts[2]
+      elsif
+        url = auth_name + ":" + auth_pwrd + "@" + url
+      end
+    end
+
+    unless url.start_with?("http://")
+       url = "http://" + url
+    end
+    url = url + "/metrics/index.json"
     puts "Getting #{url}"
     response = Typhoeus::Request.get(url)
     if response.success?
       json = Yajl::Parser.parse(response.body)
       if prefix.nil?
-        @metrics = json 
+        @metrics = json
       elsif prefix.kind_of?(Array)
         @metrics = json.grep(/^[#{prefix.map! { |k| Regexp.escape k }.join("|")}]/)
       else
