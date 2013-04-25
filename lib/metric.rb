@@ -31,16 +31,16 @@ class Metric
     if auth_name != "" and auth_pwrd != ""
       if url.start_with?("http://")
         parts = url.partition("http://")
-        url = parts[1] + auth_name + ":" + auth_pwrd + "@" + parts[2]
+        url = "#{parts[1]}#{auth_name}:#{auth_pwrd}@#{parts[2]}"
       elsif
-        url = auth_name + ":" + auth_pwrd + "@" + url
+        url = "#{auth_name}:#{auth_pwrd}@#{url}"
       end
     end
 
     unless url.start_with?("http://")
-       url = "http://" + url
+       url = "http://#{url}"
     end
-    url = url + "/metrics/index.json"
+    url = "#{url}/metrics/index.json"
     puts "Getting #{url}"
     response = Typhoeus::Request.get(url)
     if response.success?
