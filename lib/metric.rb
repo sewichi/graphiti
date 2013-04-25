@@ -1,3 +1,5 @@
+require 'uri'
+
 class Metric
   include Redised
 
@@ -25,24 +27,21 @@ class Metric
 
   private
   def self.get_metrics_list(prefix = Graphiti.settings.metric_prefix)
-    url = "#{Graphiti.settings.graphite_base_url}"
+    uri = URI("#{Graphiti.settings.graphite_base_url}")
+    
     auth_name = "#{Graphiti.settings.auth_name}"
     auth_pwrd = "#{Graphiti.settings.auth_pwrd}"
     if auth_name != "" and auth_pwrd != ""
-      if url.start_with?("http://")
-        parts = url.partition("http://")
-        url = "#{parts[1]}#{auth_name}:#{auth_pwrd}@#{parts[2]}"
+      url_string = "#{uri.scheme}://#{auth_name}:#{auth_pwrd}@#{uri.host}"
+      url_string = uri.port != "" ? "#{url_string}:#{uri.port}" : url_string
       elsif
-        url = "#{auth_name}:#{auth_pwrd}@#{url}"
-      end
+      url_string = "#{uri}"
     end
 
-    unless url.start_with?("http://")
-       url = "http://#{url}"
-    end
-    url = "#{url}/metrics/index.json"
-    puts "Getting #{url}"
-    response = Typhoeus::Request.get(url)
+    uri = URI.join(url_string, "/metrics/index.json")
+
+    puts "Getting #{uri}"
+    response = Typhoeus::Request.get("#{uri}")
     if response.success?
       json = Yajl::Parser.parse(response.body)
       if prefix.nil?
