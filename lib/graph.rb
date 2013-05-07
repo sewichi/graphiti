@@ -1,4 +1,6 @@
 require 'uri'
+require 'cgi'
+require 'json'
 require 'fileutils'
 
 class Graph
@@ -23,6 +25,34 @@ class Graph
     h
   rescue
     nil
+  end
+
+  def self.build_url(json)
+    url = Graphiti.graphite_base_url+"/render/?"
+    parts = []
+    json[:options].each do |key,value|
+      parts << "#{key}=#{CGI.escape(value)}"
+    end
+    json[:targets].each do |target|
+      if target.kind_of? Array
+        parts << "target=#{CGI.escape(target.first)}"
+      else
+        parts << "target=#{CGI.escape(target)}"
+      end
+    end
+    parts << "_timestamp_=#{Time.now().to_i}"
+    return url + parts.join('&') + '#.png'
+  end
+
+  def self.parse_graphite(url)
+    params = CGI.parse(URI.parse(url).query)
+    options = {}
+    params.each { |k,v| options[k] = v.first if k != "target"}
+    targets = params.keep_if { |k,v| k == "target"}.values.flatten
+    targets.map! {|v| [v,{}]}
+
+    json = {options: options, targets: targets}
+    {title: options["title"], json: json.to_json, url: build_url(json)}
   end
 
   # Given a URL or a URI, append the current graphite_base_url

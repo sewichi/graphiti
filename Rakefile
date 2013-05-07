@@ -33,4 +33,18 @@ namespace :graphiti do
     Dashboard.send_reports
   end
 
+  desc 'Import graphiti graphs from the list of graphite urls'
+  task :import, :source do |t, args|
+    # try running this in chrome javascript console on a graphite dashboard page $x("//img/@src").forEach(function(x) { console.log(x.value) })
+    if args[:source] == "-"
+      f = STDIN
+    else
+      f = File.open(args[:source])
+    end
+
+    f.each do |url|
+      Graph.save(Graph.parse_graphite(url))
+    end
+  end
+
 end
